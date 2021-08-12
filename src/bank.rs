@@ -11,7 +11,7 @@ use bevy_math::{Quat, Vec3};
 
 
 
-use crate::player::{Channel, Player, Scale};
+use crate::{player::{Channel, Player, Scale}, skeleton::Channel as EChan};
 
 #[derive(Debug, Clone, Default)]
 pub struct AnimationBank {
@@ -42,11 +42,47 @@ impl AnimationBank {
             None => None,
         }
     }
+    pub fn add_animation(&mut self, name: &str, bone: Entity, channel: EChan) {
+        if let Some(animation) = self.animations.get_mut(name) {
+            animation.add_channel(bone, channel)
+        } else {
+            let time = match &channel {
+                EChan::Translation(s) => s.iter().map(|l| l.len()).sum(),
+                EChan::Rotation(s) => s.iter().map(|l| l.len()).sum(),
+                EChan::Scale(s) => s.iter().map(|l| l.len()).sum(),
+            };
+            let duration = Duration::from_secs_f32(time);
+            let mut anim = Animation {
+                duration,
+                bones: Vec::new()
+            };
+            anim.add_channel(bone, channel);
+            self.animations.insert(name.to_string(), anim);
+        }
+    }
 }
+
 #[derive(Debug, Clone)]
 struct Animation {
     duration: Duration,
     bones: Vec<BoneAnimation>,
+}
+impl Animation {
+    fn add_channel(&mut self, entity: Entity, channel: EChan) {
+        let bone_anim = match self.bones.binary_search_by_key(&entity, |a| a.entity) {
+            Ok(i) => &mut self.bones[i],
+            Err(i) =>{
+                self.bones.insert(i, BoneAnimation {
+                    entity,
+                    translation: None,
+                    rotation: None,
+                    scale: None
+                });
+                &mut self.bones[i]
+            }
+        };
+        bone_anim.add_channel(channel)
+    }
 }
 #[derive(Debug, Clone)]
 struct BoneAnimation {
@@ -54,6 +90,15 @@ struct BoneAnimation {
     translation: Option<Arc<Channel<Vec3>>>,
     rotation: Option<Arc<Channel<Quat>>>,
     scale: Option<Arc<Channel<Scale>>>,
+}
+impl BoneAnimation {
+    fn add_channel(&mut self, channel: EChan) {
+        match channel {
+            EChan::Translation(s) => self.translation = Some(Arc::new(Channel::new(s))),
+            EChan::Rotation(s) => self.rotation = Some(Arc::new(Channel::new(s))),
+            EChan::Scale(s) => self.scale = Some(Arc::new(Channel::new(s))),
+        }
+    }
 }
 
 pub(crate) fn animation_starter(

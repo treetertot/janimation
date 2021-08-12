@@ -8,7 +8,7 @@ pub struct Line<T> {
     end: T,
 }
 impl<T: Clone + Add<T, Output = T> + Mul<f32, Output = T>> Line<T> {
-    fn new(length: f32, start: T, end: T) -> Self {
+    pub fn new(length: f32, start: T, end: T) -> Self {
         Line {
             slope: 1. / length,
             length,
@@ -22,5 +22,10 @@ impl<T: Clone + Add<T, Output = T> + Mul<f32, Output = T>> Line<T> {
         }
         let y = self.slope * x;
         Ok(self.start.clone() * (1. - y) + self.end.clone() * y)
+    }
+}
+impl<T> Line<T> {
+    pub fn len(&self) -> f32 {
+        self.length
     }
 }

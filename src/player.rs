@@ -15,13 +15,13 @@ pub struct Channel<T> {
     duration: f32,
 }
 impl<T> Channel<T> {
-    pub(crate) fn new(lines: Vec<Line<T>>, duration: f32) -> Self {
+    pub(crate) fn new(lines: Vec<Line<T>>) -> Self {
+        let duration = lines.iter().map(|l| l.len()).sum();
         Channel { lines, duration }
     }
 }
 
 // Maybe add a chache that refills when empty?
-//add looping
 pub struct Player<T> {
     looping: bool,
     channel: Option<Arc<Channel<T>>>,
@@ -59,17 +59,43 @@ impl<T: Clone + Add<T, Output = T> + Mul<f32, Output = T>> Player<T> {
     }
     pub fn set_channel(&mut self, channel: &Arc<Channel<T>>, looping: bool) {
         self.channel = Some(channel.clone());
+        self.idx = 0;
+        self.time = 0.;
         self.looping = looping
     }
     pub fn kill(&mut self) {
         self.channel = None;
+    }
+    pub fn new() -> Self {
+        Player {
+            looping: false,
+            channel: None,
+            idx: 0,
+            time: 0.
+        }
+    }
+}
+
+#[derive(Bundle)]
+pub struct PlayerBundle {
+    translation: Player<Vec3>,
+    rotation: Player<Quat>,
+    scale: Player<Scale>,
+}
+impl PlayerBundle {
+    pub fn new() -> PlayerBundle {
+        PlayerBundle {
+            translation: Player::new(),
+            rotation: Player::new(),
+            scale: Player::new()
+        }
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct Scale(Vec3);
 impl Scale {
-    fn new(axes: Vec3) -> Scale {
+    pub fn new(axes: Vec3) -> Scale {
         Scale(axes)
     }
 }
