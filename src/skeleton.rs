@@ -69,8 +69,9 @@ impl Animations {
             animations: HashMap::new()
         }
     }
-    pub fn add_animation(&mut self, name: String, channels: Vec<(usize, Channel)>) {
+    pub fn add_animation(&mut self, name: String, channels: Vec<(usize, Channel)>) -> &mut Self {
         self.animations.insert(name, channels);
+        self
     }
     pub fn instance(self, mut commands: Commands) -> Result<Entity, ()> {
         let mut root_coms = commands.spawn();
