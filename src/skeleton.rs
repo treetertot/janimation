@@ -54,8 +54,8 @@ impl Bone {
 
 #[derive(Debug, Default)]
 pub struct Drawable {
-    mesh: Handle<Mesh>,
-    material: Handle<StandardMaterial>
+    pub mesh: Handle<Mesh>,
+    pub material: Handle<StandardMaterial>
 }
 
 pub struct Animations {
