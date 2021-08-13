@@ -69,7 +69,7 @@ impl Animations {
             animations: HashMap::new()
         }
     }
-    pub fn add_animation(&mut self, name: String, channels: Vec<(usize, Channel)>) -> &mut Self {
+    pub fn add_animation(mut self, name: String, channels: Vec<(usize, Channel)>) -> Self {
         self.animations.insert(name, channels);
         self
     }
