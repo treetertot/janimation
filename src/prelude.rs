@@ -1,6 +1,8 @@
 use bevy_ecs::{prelude::IntoSystem, schedule::ParallelSystemDescriptorCoercion};
 use bevy_internal::prelude::Plugin;
 
+pub use crate::interpolation::*;
+
 use crate::{bank::{animation_starter, animation_stopper, animation_cleaner}, player::{rotation, scale, translation}};
 
 pub struct SkeletonPlugin;
